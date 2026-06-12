@@ -1,0 +1,65 @@
+/* Brand Tokens */
+:root {
+    --wilmu-green: #008350;
+    --deep-text-green: #003320;
+    --canvas-white: #F9FBF9;
+    --body-charcoal: #2B2B2B;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--canvas-white);
+    color: var(--body-charcoal);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Header Bar */
+header {
+    background-color: var(--wilmu-green);
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header .logo { font-weight: bold; letter-spacing: 1px; }
+header nav a { color: white; margin-left: 20px; text-decoration: none; font-size: 0.9em; }
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+h1 { color: var(--deep-text-green); font-size: 3em; text-transform: uppercase; margin-bottom: 10px; }
+h2 { color: var(--body-charcoal); font-weight: 400; margin-bottom: 30px; }
+
+.btn {
+    background-color: var(--wilmu-green);
+    color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+/* Grid Cards */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border: 1px solid #e1e4e8;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.card h3 { color: var(--body-charcoal); }
