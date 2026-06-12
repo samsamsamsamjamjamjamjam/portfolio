@@ -8,10 +8,10 @@ This site serves as an interactive hub for my Teaching Assistant applications. I
 Each section represents a targeted roadmap for specific courses, bridging the gap between dense doctrinal theory and real-world transactional/litigation practice.
 
 ## Professor Hubs
-- [Civil Procedure (Prof. Sparks)](https://[your-username].github.io/sparks.html)
-- [Torts (Prof. Johnson)](https://[your-username].github.io/johnson.html)
-- [Contracts (Prof. Gowen)](https://[your-username].github.io/gowen.html)
-- [Seminar (Prof. Epstein)](https://[your-username].github.io/epstein.html)
+- [Civil Procedure (Prof. Sparks)](https://samsamsamsamjamjamjamjam.github.io/sparks.html)
+- [Torts (Prof. Johnson)](https://samsamsamsamjamjamjamjam.github.io/johnson.html)
+- [Contracts (Prof. Gowen)](https://samsamsamsamjamjamjamjam.github.io/gowen.html)
+- [Seminar (Prof. Epstein)](https://samsamsamsamjamjamjamjam.github.io/epstein.html)
 
 ## Technical Stack
 - **Framework:** HTML5/CSS3 (Static Site)
