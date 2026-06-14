@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Civ Pro Attack Tool</title>
+  <style>
+    :root {
+      --ink: #151821;
+      --muted: #5d6472;
+      --line: #d9dee7;
+      --paper: #fbfbf8;
+      --panel: #ffffff;
+      --teal: #177e89;
+      --brick: #a6423a;
+      --gold: #b6811d;
+      --green: #28704b;
+      --shadow: 0 14px 35px rgba(21, 24, 33, .12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(23, 126, 137, .08), transparent 34%),
+        linear-gradient(315deg, rgba(166, 66, 58, .08), transparent 32%),
+        var(--paper);
+    }
+
+    button, input, textarea, select { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+    }
+
+    aside {
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, .72);
+      backdrop-filter: blur(12px);
+      padding: 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    main {
+      padding: 28px;
+      max-width: 1180px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 24px;
+      margin: 0 0 8px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin: 0 0 10px;
+      letter-spacing: 0;
+    }
+
+    p { color: var(--muted); line-height: 1.5; }
+
+    .lede { margin: 0 0 22px; }
+
+    .tabs {
+      display: grid;
+      gap: 8px;
+      margin: 22px 0;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      min-height: 46px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tab[aria-selected="true"] {
+      border-color: var(--teal);
+      box-shadow: inset 4px 0 0 var(--teal);
+      font-weight: 700;
+    }
+
+    .tab small {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .side-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      padding: 9px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      color: white;
+      border-color: var(--teal);
+    }
+
+    .btn.warn {
+      color: var(--brick);
+      border-color: rgba(166, 66, 58, .4);
+    }
+
+    .tool {
+      display: none;
+      animation: lift .16s ease-out;
+    }
+
+    .tool.active { display: block; }
+
+    @keyframes lift {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, .82);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .stack { display: grid; gap: 14px; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(21, 24, 33, .06);
+      padding: 16px;
+    }
+
+    .step {
+      border-left: 4px solid var(--teal);
+      padding-left: 12px;
+    }
+
+    .step.erie { border-color: var(--brick); }
+    .step.smj { border-color: var(--gold); }
+    .step.good { border-color: var(--green); }
+
+    .check {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 9px 0;
+      border-top: 1px solid rgba(217, 222, 231, .72);
+    }
+
+    .check:first-of-type { border-top: 0; }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--teal);
+      margin-top: 2px;
+    }
+
+    .check b { display: block; margin-bottom: 2px; }
+    .check span { color: var(--muted); line-height: 1.42; }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px;
+      resize: vertical;
+    }
+
+    textarea { min-height: 116px; }
+
+    .mini {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .result {
+      border-radius: 8px;
+      padding: 14px;
+      background: #f7faf8;
+      border: 1px solid rgba(40, 112, 75, .24);
+      white-space: pre-wrap;
+      line-height: 1.45;
+      min-height: 120px;
+    }
+
+    .danger-box {
+      background: #fff7f5;
+      border: 1px solid rgba(166, 66, 58, .24);
+      border-radius: 8px;
+      padding: 12px;
+      color: #74302b;
+      line-height: 1.45;
+    }
+
+    .flow {
+      display: grid;
+      gap: 10px;
+    }
+
+    .flow-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .flow-item strong { display: block; margin-bottom: 4px; }
+
+    .export-box {
+      position: fixed;
+      inset: 24px;
+      background: rgba(21, 24, 33, .38);
+      display: none;
+      place-items: center;
+      padding: 20px;
+      z-index: 5;
+    }
+
+    .export-box.open { display: grid; }
+
+    .modal {
+      max-width: 860px;
+      width: 100%;
+      max-height: 86vh;
+      overflow: auto;
+      background: var(--panel);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .modal textarea { min-height: 360px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      aside {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      main { padding: 18px; }
+      .grid { grid-template-columns: 1fr; }
+      .tabs { grid-template-columns: 1fr; }
+      .toolbar { align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <h1>Civ Pro Attack Tool</h1>
+      <p class="lede">Three guided exam checkers built from the classic Civ Pro flow: Erie, personal jurisdiction, and SMJ/removal.</p>
+
+      <nav class="tabs" aria-label="Civ Pro tools">
+        <button class="tab" data-tab="erie" aria-selected="true">Erie Decision Tree <small id="erie-count">0/0</small></button>
+        <button class="tab" data-tab="pj" aria-selected="false">Personal Jurisdiction <small id="pj-count">0/0</small></button>
+        <button class="tab" data-tab="smj" aria-selected="false">SMJ / Removal <small id="smj-count">0/0</small></button>
+      </nav>
+
+      <div class="side-actions">
+        <button class="btn primary" id="exportBtn">Export exam notes</button>
+        <button class="btn" id="copyBtn">Copy active result</button>
+        <button class="btn warn" id="clearBtn">Clear saved work</button>
+      </div>
+
+      <p class="mini">Saved automatically in this browser. Nothing leaves your computer.</p>
+    </aside>
+
+    <main>
+      <section id="erie" class="tool active">
+        <div class="toolbar">
+          <div>
+            <h2>Erie Doctrine Decision Tree</h2>
+            <p class="lede">Use when a federal court must decide whether to apply state law, federal practice, or a Federal Rule.</p>
+          </div>
+          <div class="pill-row">
+            <span class="pill">Erie</span>
+            <span class="pill">Klaxon</span>
+            <span class="pill">York</span>
+            <span class="pill">Hanna</span>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="stack">
+            <div class="card step erie">
+              <h3>1. Trigger</h3>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="diversity"><span><b>Federal court is hearing state-law claims through diversity or supplemental jurisdiction.</b> Erie usually matters when the federal court is deciding state-created rights.</span></label>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="choice"><span><b>There is a genuine state-vs-federal conflict.</b> Identify the exact state rule and the exact federal rule/practice.</span></label>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="klaxon"><span><b>Choice of law checked under Klaxon.</b> Federal court sitting in diversity uses the forum state's choice-of-law rules.</span></label>
+            </div>
+
+            <div class="card step erie">
+              <h3>2. Hanna Track Selection</h3>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="fedrule"><span><b>Federal Rule, statute, or constitutional provision directly addresses the issue.</b> If yes, use Hanna Part II.</span></label>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="valid"><span><b>Federal Rule is valid under the Rules Enabling Act.</b> Ask whether it regulates practice/procedure and does not abridge, enlarge, or modify substantive rights.</span></label>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="practice"><span><b>If no Federal Rule controls, apply Hanna Part I.</b> Ask whether federal practice would create forum shopping or inequitable administration of laws.</span></label>
+            </div>
+
+            <div class="card step erie">
+              <h3>3. Final Exam Sentence</h3>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="substance"><span><b>Substantive law goes state; procedure usually goes federal.</b> Be precise: statutes of limitations are usually substantive in diversity.</span></label>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="prediction"><span><b>If state law is unclear, make an Erie prediction.</b> Predict what the state's highest court would decide today.</span></label>
+              <label class="check"><input type="checkbox" data-tool="erie" data-key="fcl"><span><b>Federal common law considered only for narrow federal interests.</b> Erie abolished federal general common law, not every federal common law doctrine.</span></label>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <h3>Facts to plug in</h3>
+              <textarea data-note="erie-facts" placeholder="Example: Diversity case in federal court. State rule requires in-hand service on executor; FRCP 4 allows service at usual abode."></textarea>
+            </div>
+            <div class="card">
+              <h3>Generated attack paragraph</h3>
+              <div class="result" id="erie-result"></div>
+            </div>
+            <div class="danger-box"><b>Watch for the trap:</b> do not jump straight to “substantive vs procedural.” First ask whether a Federal Rule directly controls. That decides which Hanna track you are on.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="pj" class="tool">
+        <div class="toolbar">
+          <div>
+            <h2>Personal Jurisdiction Flowchart</h2>
+            <p class="lede">Start with statutory authorization, then constitutional due process: minimum contacts plus fairness.</p>
+          </div>
+          <div class="pill-row">
+            <span class="pill">Long arm</span>
+            <span class="pill">Minimum contacts</span>
+            <span class="pill">Fairness</span>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="stack">
+            <div class="card step">
+              <h3>1. Statutory Basis</h3>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="longarm"><span><b>Long-arm statute authorizes jurisdiction.</b> Some states reach to due-process limits; others list specific acts.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="service"><span><b>Service of process is proper.</b> Without valid service or waiver, personal jurisdiction can fail.</span></label>
+            </div>
+
+            <div class="card step">
+              <h3>2. General Jurisdiction</h3>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="individual"><span><b>Individual is domiciled in the forum.</b> Domicile is a standard general jurisdiction basis.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="corp"><span><b>Corporation is essentially at home.</b> Usually state of incorporation and principal place of business under Daimler.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="tag"><span><b>Tag jurisdiction or consent applies.</b> Burnham supports service while voluntarily present; forum-selection clauses and waiver can also establish PJ.</span></label>
+            </div>
+
+            <div class="card step">
+              <h3>3. Specific Jurisdiction</h3>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="contact"><span><b>Defendant created contacts with the forum.</b> The contact must be the defendant's, not just plaintiff's unilateral move.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="avail"><span><b>Purposeful availment or purposeful direction exists.</b> Contracts, targeting, marketing, customization, or continuing relationships can matter.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="related"><span><b>Claim arises out of or relates to forum contacts.</b> Ford allows relatedness without strict but-for causation.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="stream"><span><b>Stream-of-commerce issue handled.</b> Asahi/Nicastro are fractured; look for plus factors or targeting of the forum.</span></label>
+            </div>
+
+            <div class="card step good">
+              <h3>4. Fairness Factors</h3>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="fair1"><span><b>Burden on defendant.</b> Foreign defendants and distant forums raise stronger fairness concerns.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="fair2"><span><b>Forum state's interest.</b> Injury in forum, resident plaintiff, or local regulation helps.</span></label>
+              <label class="check"><input type="checkbox" data-tool="pj" data-key="fair3"><span><b>Plaintiff, efficiency, and shared policy interests.</b> Use the World-Wide Volkswagen factors if contacts are close.</span></label>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <h3>Quick flow</h3>
+              <div class="flow">
+                <div class="flow-item"><strong>1. Can the forum reach the defendant?</strong><span class="mini">Long arm + service/waiver.</span></div>
+                <div class="flow-item"><strong>2. General PJ?</strong><span class="mini">Domicile, incorporation, principal place of business, rare exceptional forum.</span></div>
+                <div class="flow-item"><strong>3. Specific PJ?</strong><span class="mini">Contact, purposeful availment, relatedness, fairness.</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Facts to plug in</h3>
+              <textarea data-note="pj-facts" placeholder="Example: Defendant sold products through a national distributor; injury occurred in forum; defendant advertised there but did not manufacture there."></textarea>
+            </div>
+            <div class="card">
+              <h3>Generated attack paragraph</h3>
+              <div class="result" id="pj-result"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="smj" class="tool">
+        <div class="toolbar">
+          <div>
+            <h2>SMJ / Removal Checker</h2>
+            <p class="lede">Federal courts are limited jurisdiction courts. Check original jurisdiction first, then removal rules.</p>
+          </div>
+          <div class="pill-row">
+            <span class="pill">1331</span>
+            <span class="pill">1332</span>
+            <span class="pill">1367</span>
+            <span class="pill">1441</span>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="stack">
+            <div class="card step smj">
+              <h3>1. Federal Question</h3>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="wpc"><span><b>Federal issue appears on the face of plaintiff's well-pleaded complaint.</b> Anticipated defenses do not create FQJ under Mottley.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="created"><span><b>Federal law creates the cause of action.</b> Holmes test solves most federal question cases.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="grable"><span><b>Embedded federal issue checked if state-law claim.</b> Grable path is rare: necessarily raised, actually disputed, substantial, and compatible with federal-state balance.</span></label>
+            </div>
+
+            <div class="card step smj">
+              <h3>2. Diversity</h3>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="complete"><span><b>Complete diversity exists.</b> No plaintiff shares citizenship with any defendant.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="domicile"><span><b>Citizenship measured correctly at filing.</b> Individuals: domicile = residence + intent to remain indefinitely. Corporations: incorporation + principal place of business.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="amount"><span><b>Amount in controversy exceeds $75,000.</b> Good-faith amount accepted unless legal certainty it is too low.</span></label>
+            </div>
+
+            <div class="card step smj">
+              <h3>3. Supplemental Jurisdiction</h3>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="common"><span><b>Claims share a common nucleus of operative fact.</b> Use § 1367(a) for related claims in the same case or controversy.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="1367b"><span><b>In diversity-only cases, § 1367(b) limits plaintiff-side joinder.</b> Watch Rule 14, 19, 20, and 24 party claims.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="discretion"><span><b>Discretionary decline considered.</b> Novel state issue, state claim predominates, federal claims dismissed, or exceptional circumstances.</span></label>
+            </div>
+
+            <div class="card step smj">
+              <h3>4. Removal / Remand</h3>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="couldfile"><span><b>Case could have been filed in federal court originally.</b> Removal depends on original SMJ.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="embrace"><span><b>Removed to the federal district embracing the state court.</b> Removal does not move to any preferred federal venue.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="unanimity"><span><b>All properly joined and served defendants consent.</b> Watch later-served defendant rules and veto/remand timing.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="forumdef"><span><b>Forum defendant rule checked for diversity removal.</b> A properly joined and served in-state defendant blocks diversity removal.</span></label>
+              <label class="check"><input type="checkbox" data-tool="smj" data-key="deadlines"><span><b>Timing checked.</b> Usually 30 days from service/removability; one-year cap for diversity unless bad faith.</span></label>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <h3>Facts to plug in</h3>
+              <textarea data-note="smj-facts" placeholder="Example: Plaintiff sues in state court on state tort claim. Parties are citizens of different states, AIC is $120,000, but one defendant is a citizen of the forum state."></textarea>
+            </div>
+            <div class="card">
+              <h3>Generated attack paragraph</h3>
+              <div class="result" id="smj-result"></div>
+            </div>
+            <div class="danger-box"><b>Watch for the trap:</b> SMJ cannot be waived and can be raised anytime. Removal defects other than SMJ usually need a timely remand motion.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="export-box" id="exportBox" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+    <div class="modal">
+      <div class="toolbar">
+        <div>
+          <h2 id="exportTitle">Exam Notes Export</h2>
+          <p class="lede">Copy this into your outline, notes app, or practice exam answer.</p>
+        </div>
+        <button class="btn" id="closeExport">Close</button>
+      </div>
+      <textarea id="exportText"></textarea>
+    </div>
+  </div>
+
+  <script>
+    const stateKey = "civpro-attack-tool-v1";
+    const tools = {
+      erie: {
+        title: "Erie Doctrine",
+        result: () => [
+          "Erie applies when a federal court adjudicates state-created rights, usually in diversity or supplemental jurisdiction.",
+          "First identify the precise conflict between state law and federal law/practice, and use the forum state's choice-of-law rules under Klaxon.",
+          checked("erie", "fedrule")
+            ? "Because a Federal Rule/statute appears to directly govern, use Hanna Part II: the federal rule controls if valid under the Rules Enabling Act and Constitution."
+            : "If no Federal Rule directly controls, use Hanna Part I/York: ask whether the federal practice would encourage forum shopping or inequitable administration of laws.",
+          "State substantive law controls; federal procedural law generally controls. If state law is unclear, predict what the state's highest court would decide today."
+        ].join("\\n\\n")
+      },
+      pj: {
+        title: "Personal Jurisdiction",
+        result: () => [
+          "Personal jurisdiction requires statutory authorization and constitutional due process.",
+          "Start with the forum long-arm statute and proper service or waiver.",
+          checked("pj", "corp") || checked("pj", "individual") || checked("pj", "tag")
+            ? "General jurisdiction may be available through domicile, the corporation's at-home forums, tag service, consent, or waiver."
+            : "If general jurisdiction is unavailable, move to specific jurisdiction.",
+          "Specific jurisdiction requires defendant-created forum contacts, purposeful availment or direction, and a claim that arises out of or relates to those contacts.",
+          "Finally, apply fairness: burden on defendant, forum state's interest, plaintiff's interest, efficiency, and shared policy interests."
+        ].join("\\n\\n")
+      },
+      smj: {
+        title: "SMJ / Removal",
+        result: () => [
+          "Federal subject matter jurisdiction must come from federal question, diversity, supplemental jurisdiction, or another statutory grant.",
+          checked("smj", "wpc")
+            ? "Federal question jurisdiction is strongest if the federal issue appears on the face of plaintiff's well-pleaded complaint."
+            : "Do not rely on anticipated federal defenses for federal question jurisdiction.",
+          "Diversity requires complete diversity at filing and more than $75,000 in controversy.",
+          "Supplemental jurisdiction under § 1367 requires a common nucleus of operative fact, subject to § 1367(b) limits in diversity-only cases.",
+          "Removal is proper only if the case could have been filed in federal court, is removed to the district embracing the state court, satisfies consent/timing rules, and is not barred by the forum defendant rule in diversity cases."
+        ].join("\\n\\n")
+      }
+    };
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(stateKey)) || {}; }
+      catch { return {}; }
+    }
+
+    let saved = load();
+
+    function persist() {
+      localStorage.setItem(stateKey, JSON.stringify(saved));
+    }
+
+    function checked(tool, key) {
+      return Boolean(saved.checks && saved.checks[tool] && saved.checks[tool][key]);
+    }
+
+    function setChecked(tool, key, value) {
+      saved.checks ||= {};
+      saved.checks[tool] ||= {};
+      saved.checks[tool][key] = value;
+      persist();
+      render();
+    }
+
+    function setNote(key, value) {
+      saved.notes ||= {};
+      saved.notes[key] = value;
+      persist();
+    }
+
+    function renderCounts() {
+      Object.keys(tools).forEach(tool => {
+        const boxes = [...document.querySelectorAll(`input[data-tool="${tool}"]`)];
+        const done = boxes.filter(box => box.checked).length;
+        document.getElementById(`${tool}-count`).textContent = `${done}/${boxes.length}`;
+      });
+    }
+
+    function renderResults() {
+      Object.keys(tools).forEach(tool => {
+        document.getElementById(`${tool}-result`).textContent = tools[tool].result();
+      });
+    }
+
+    function render() {
+      document.querySelectorAll("input[type='checkbox'][data-tool]").forEach(box => {
+        box.checked = checked(box.dataset.tool, box.dataset.key);
+      });
+      renderCounts();
+      renderResults();
+    }
+
+    function activeTool() {
+      return document.querySelector(".tool.active").id;
+    }
+
+    function exportText() {
+      return Object.keys(tools).map(tool => {
+        const facts = (saved.notes && saved.notes[`${tool}-facts`]) || "";
+        const boxes = [...document.querySelectorAll(`input[data-tool="${tool}"]`)];
+        const selected = boxes
+          .filter(box => box.checked)
+          .map(box => "- " + box.closest(".check").querySelector("b").textContent)
+          .join("\\n") || "- No boxes checked yet.";
+        return [
+          `# ${tools[tool].title}`,
+          facts ? `Facts:\\n${facts}` : "Facts:\\n",
+          `Checked issues:\\n${selected}`,
+          `Attack paragraph:\\n${tools[tool].result()}`
+        ].join("\\n\\n");
+      }).join("\\n\\n---\\n\\n");
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", "false"));
+        document.querySelectorAll(".tool").forEach(panel => panel.classList.remove("active"));
+        tab.setAttribute("aria-selected", "true");
+        document.getElementById(tab.dataset.tab).classList.add("active");
+      });
+    });
+
+    document.querySelectorAll("input[type='checkbox'][data-tool]").forEach(box => {
+      box.addEventListener("change", () => setChecked(box.dataset.tool, box.dataset.key, box.checked));
+    });
+
+    document.querySelectorAll("textarea[data-note]").forEach(area => {
+      area.value = (saved.notes && saved.notes[area.dataset.note]) || "";
+      area.addEventListener("input", () => setNote(area.dataset.note, area.value));
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const tool = activeTool();
+      const text = document.getElementById(`${tool}-result`).textContent;
+      await navigator.clipboard.writeText(text);
+      document.getElementById("copyBtn").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyBtn").textContent = "Copy active result", 1100);
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      document.getElementById("exportText").value = exportText();
+      document.getElementById("exportBox").classList.add("open");
+    });
+
+    document.getElementById("closeExport").addEventListener("click", () => {
+      document.getElementById("exportBox").classList.remove("open");
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (!confirm("Clear all saved checkboxes and notes?")) return;
+      saved = {};
+      localStorage.removeItem(stateKey);
+      document.querySelectorAll("textarea[data-note]").forEach(area => area.value = "");
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
