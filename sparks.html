@@ -1,37 +1,53 @@
-<style>
-    .timeline { display: flex; justify-content: space-between; margin: 40px 0; overflow-x: auto; gap: 5px; }
-    .step { flex: 1; padding: 20px; text-align: center; color: white; cursor: pointer; transition: 0.3s; font-weight: bold; border-radius: 8px; font-size: 0.9em; }
-    .step:hover { opacity: 0.9; transform: scale(1.02); }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --wilmu-green: #008350;
+            --deep-green: #004d2f;
+            --canvas: #f9f9f7;
+            --charcoal: #333333;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--canvas); color: var(--charcoal); line-height: 1.6; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: var(--deep-green); border-bottom: 2px solid var(--wilmu-green); padding-bottom: 10px; }
+        .timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 40px 0; }
+        .step { padding: 15px 5px; text-align: center; color: white; cursor: pointer; border-radius: 4px; font-weight: 600; font-size: 0.85em; transition: 0.2s; }
+        .p-plaintiff { background-color: #3498db; }
+        .p-defendant { background-color: #e74c3c; }
+        .p-both { background-color: var(--wilmu-green); }
+        .step:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        #info-box { padding: 25px; background: white; border-left: 5px solid var(--wilmu-green); box-shadow: 0 2px 5px rgba(0,0,0,0.05); min-height: 80px; }
+    </style>
+</head>
+<body>
+
+    <h1>Civil Procedure: Litigation Lifecycle</h1>
+    <p>A procedural overview based on <em>litigation.jpg</em>. Select a phase to explore the jurisdictional and tactical responsibilities of each party.</p>
     
-    /* Color Legend: Plaintiff (Blue), Defendant (Red), Both (Purple) */
-    .p-plaintiff { background-color: #3498db; }
-    .p-defendant { background-color: #e74c3c; }
-    .p-both { background-color: #8e44ad; }
+    <div class="timeline">
+        <div class="step p-plaintiff" onclick="showInfo('Complaint')">Complaint (P)</div>
+        <div class="step p-defendant" onclick="showInfo('Answer')">Answer/Motion (D)</div>
+        <div class="step p-both" onclick="showInfo('Discovery')">Discovery (Both)</div>
+        <div class="step p-both" onclick="showInfo('Pretrial')">Pretrial (Both)</div>
+        <div class="step p-both" onclick="showInfo('Trial')">Trial (Both)</div>
+        <div class="step p-both" onclick="showInfo('Appeal')">Appeal (Both)</div>
+    </div>
 
-    #info-box { padding: 20px; background: #f4f4f4; border-left: 5px solid #333; margin-top: 20px; min-height: 100px; }
-</style>
+    <div id="info-box"><h3>Select a stage to review procedural requirements.</h3></div>
 
-<div class="timeline">
-    <div class="step p-plaintiff" onclick="showInfo('Complaint')">Complaint (P)</div>
-    <div class="step p-defendant" onclick="showInfo('Answer')">Answer/Motion (D)</div>
-    <div class="step p-both" onclick="showInfo('Discovery')">Discovery (Both)</div>
-    <div class="step p-both" onclick="showInfo('Pretrial')">Pretrial (Both)</div>
-    <div class="step p-both" onclick="showInfo('Trial')">Trial (Both)</div>
-    <div class="step p-both" onclick="showInfo('Appeal')">Appeal (Both)</div>
-</div>
-
-<div id="info-box"><h3>Click a phase to learn more.</h3></div>
-
-<script>
-function showInfo(phase) {
-    const info = {
-        'Complaint': '<strong>Plaintiff:</strong> Files the complaint to initiate the action.',
-        'Answer': '<strong>Defendant:</strong> Files an answer, asserts defenses, or moves to dismiss.',
-        'Discovery': '<strong>Both Parties:</strong> Investigate facts, take discovery, file and argue motions.',
-        'Pretrial': '<strong>Both Parties:</strong> Pretrial conference, possible motions for summary judgment or on evidentiary issues.',
-        'Trial': '<strong>Both Parties:</strong> Opening/closing statements, evidence, jury instructions, deliberation, and verdict.',
-        'Appeal': '<strong>Both Parties:</strong> Losing party may appeal errors of law to a higher court.'
-    };
-    document.getElementById('info-box').innerHTML = `<h3>${phase} Phase</h3><p>${info[phase]}</p>`;
-}
-</script>
+    <script>
+        function showInfo(phase) {
+            const info = {
+                'Complaint': '<strong>Plaintiff:</strong> Initiates the action by filing the complaint.',
+                'Answer': '<strong>Defendant:</strong> Responds via Answer, asserted defenses, or Rule 12 motion.',
+                'Discovery': '<strong>Both Parties:</strong> Exchange of information, depositions, and evidentiary motions.',
+                'Pretrial': '<strong>Both Parties:</strong> Pretrial conference; summary judgment and evidentiary hearings.',
+                'Trial': '<strong>Both Parties:</strong> Presentation of evidence, closing arguments, and jury deliberation.',
+                'Appeal': '<strong>Both Parties:</strong> Review for errors of law by a higher court.'
+            };
+            document.getElementById('info-box').innerHTML = `<h3>${phase}</h3><p>${info[phase]}</p>`;
+        }
+    </script>
+</body>
+</html>
