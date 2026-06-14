@@ -8,28 +8,35 @@
 </head>
 <body>
 <header>
-    <div class="logo">KAYLA HOWSARE | WILMINGTON UNIVERSITY LAW</div>
-    <nav>
-        <a href="index.html">HOME</a>
-        <a href="catalog.html" target="_blank">FULL TOOLBOX</a>
-        <a href="https://samsamsamsamjamjamjamjam.github.io/philosophy.html">PHILOSOPHY</a>
-    </nav>
+    <div class="logo">KAYLA HOWSARE | CIVIL PROCEDURE SIMULATOR</div>
+    <nav><a href="index.html">HOME</a></nav>
 </header>
-<div class="hero" style="background: #f4f4f4; padding: 40px 20px; border-bottom: 2px solid #008350;">
-    <h2>Dear Professor Sparks,</h2>
-    <p style="font-size: 1.2rem;">Welcome to my portfolio. I’ve tailored this space to demonstrate how my pedagogical tools can specifically support your Civil Procedure curriculum.</p>
-</div>
-<div class="hero">
-    <h1>ENCOURAGING LEGAL EXCELLENCE<BR> THROUGH INNOVATION AND INCLUSIVITY</h1>
-    <h2>Your Ideal Assistant for Pedagogical Innovation</h2>
-  <a href="Kayla_Howsare_Resume.pdf" class="btn" target="_blank">DOWNLOAD CV</a>
-</div>
-<div class="grid">
-    <div class="card" style="border: 2px solid #008350;">
-        <h3>Litigation Simulator</h3>
-        <p>Procedural scaffolding for FRCP compliance and case management.</p>
-        <button class="btn" onclick="alert('Tool activated!')">Open Tool</button>
+
+<div class="hero" style="padding: 40px 20px;">
+    <h2>Litigation Lifecycle: Rule 12(b) Juncture</h2>
+    <div id="game-container">
+        <p id="scenario"><strong>Scenario:</strong> You represent the defendant. The Plaintiff has just served the Complaint. What is your next procedural move under the FRCP?</p>
+        
+        <div id="choices">
+            <button onclick="checkAnswer(false)">A) Immediately serve interrogatories (Discovery).</button><br><br>
+            <button onclick="checkAnswer(true)">B) Evaluate for a Rule 12(b) Motion to Dismiss.</button><br><br>
+            <button onclick="checkAnswer(false)">C) Do nothing; the Plaintiff must prove their case first.</button>
+        </div>
+        <p id="feedback" style="margin-top:20px; font-weight:bold;"></p>
     </div>
 </div>
+
+<script>
+function checkAnswer(isCorrect) {
+    const feedback = document.getElementById('feedback');
+    if (isCorrect) {
+        feedback.innerHTML = "Correct! Under Rule 12(b), you must raise certain defenses before filing an Answer. Discovery is premature at this stage.";
+        feedback.style.color = "#008350";
+    } else {
+        feedback.innerHTML = "Incorrect. Refer to Rule 12(b) regarding the timing of motions and responsive pleadings.";
+        feedback.style.color = "red";
+    }
+}
+</script>
 </body>
 </html>
