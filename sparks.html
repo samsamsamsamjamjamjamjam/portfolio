@@ -2,52 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <style>
-        :root {
-            --wilmu-green: #008350;
-            --deep-green: #004d2f;
-            --canvas: #f9f9f7;
-            --charcoal: #333333;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--canvas); color: var(--charcoal); line-height: 1.6; max-width: 900px; margin: 40px auto; padding: 0 20px; }
-        h1 { color: var(--deep-green); border-bottom: 2px solid var(--wilmu-green); padding-bottom: 10px; }
-        .timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 40px 0; }
-        .step { padding: 15px 5px; text-align: center; color: white; cursor: pointer; border-radius: 4px; font-weight: 600; font-size: 0.85em; transition: 0.2s; }
-        .p-plaintiff { background-color: #3498db; }
-        .p-defendant { background-color: #e74c3c; }
-        .p-both { background-color: var(--wilmu-green); }
-        .step:hover { filter: brightness(1.1); transform: translateY(-2px); }
-        #info-box { padding: 25px; background: white; border-left: 5px solid var(--wilmu-green); box-shadow: 0 2px 5px rgba(0,0,0,0.05); min-height: 80px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayla Howsare | Law Portfolio</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <h1>Civil Procedure: Litigation Lifecycle</h1>
-    <p>A procedural overview based on <em>litigation.jpg</em>. Select a phase to explore the jurisdictional and tactical responsibilities of each party.</p>
-    
-    <div class="timeline">
-        <div class="step p-plaintiff" onclick="showInfo('Complaint')">Complaint (P)</div>
-        <div class="step p-defendant" onclick="showInfo('Answer')">Answer/Motion (D)</div>
-        <div class="step p-both" onclick="showInfo('Discovery')">Discovery (Both)</div>
-        <div class="step p-both" onclick="showInfo('Pretrial')">Pretrial (Both)</div>
-        <div class="step p-both" onclick="showInfo('Trial')">Trial (Both)</div>
-        <div class="step p-both" onclick="showInfo('Appeal')">Appeal (Both)</div>
+<header>
+    <div class="logo">KAYLA HOWSARE | WILMINGTON UNIVERSITY LAW</div>
+    <nav>
+        <a href="index.html">HOME</a>
+        <a href="catalog.html" target="_blank">FULL TOOLBOX</a>
+        <a href="https://samsamsamsamjamjamjamjam.github.io/philosophy.html">PHILOSOPHY</a>
+    </nav>
+</header>
+<div class="hero" style="background: #f4f4f4; padding: 40px 20px; border-bottom: 2px solid #008350;">
+    <h2>Dear Professor Sparks,</h2>
+    <p style="font-size: 1.2rem;">Welcome to my portfolio. I’ve tailored this space to demonstrate how my pedagogical tools can specifically support your Seminar curriculum.</p>
+</div>
+<div class="hero">
+    <h1>ENCOURAGING LEGAL EXCELLENCE<BR> THROUGH INNOVATION AND INCLUSIVITY</h1>
+    <h2>Your Ideal Assistant for Pedagogical Innovation</h2>
+   <a href="Kayla_Howsare_Resume.pdf" class="btn" target="_blank">DOWNLOAD CV</a>
+</div>
+<div class="grid">
+    <div class="card" style="border: 2px solid #008350;">
+        <h3>Case Narrative Tracker</h3>
+        <p>Systematic synthesis for scholarly research and complex case mapping.</p>
+        <button class="btn" onclick="alert('Tool activated!')">Open Tool</button>
     </div>
-
-    <div id="info-box"><h3>Select a stage to review procedural requirements.</h3></div>
-
-    <script>
-        function showInfo(phase) {
-            const info = {
-                'Complaint': '<strong>Plaintiff:</strong> Initiates the action by filing the complaint.',
-                'Answer': '<strong>Defendant:</strong> Responds via Answer, asserted defenses, or Rule 12 motion.',
-                'Discovery': '<strong>Both Parties:</strong> Exchange of information, depositions, and evidentiary motions.',
-                'Pretrial': '<strong>Both Parties:</strong> Pretrial conference; summary judgment and evidentiary hearings.',
-                'Trial': '<strong>Both Parties:</strong> Presentation of evidence, closing arguments, and jury deliberation.',
-                'Appeal': '<strong>Both Parties:</strong> Review for errors of law by a higher court.'
-            };
-            document.getElementById('info-box').innerHTML = `<h3>${phase}</h3><p>${info[phase]}</p>`;
-        }
-    </script>
+</div>
 </body>
 </html>
