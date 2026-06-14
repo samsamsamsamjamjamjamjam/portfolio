@@ -13,28 +13,46 @@
 </header>
 
 <div class="hero" style="padding: 40px 20px;">
-    <h2>Litigation Lifecycle: Rule 12(b) Juncture</h2>
+    <h2 id="step-title">Step 1: The Complaint</h2>
     <div id="game-container">
-        <p id="scenario"><strong>Scenario:</strong> You represent the defendant. The Plaintiff has just served the Complaint. What is your next procedural move under the FRCP?</p>
-        
+        <p id="scenario">You are served a complaint. What is your first procedural priority under the FRCP?</p>
         <div id="choices">
-            <button onclick="checkAnswer(false)">A) Immediately serve interrogatories (Discovery).</button><br><br>
-            <button onclick="checkAnswer(true)">B) Evaluate for a Rule 12(b) Motion to Dismiss.</button><br><br>
-            <button onclick="checkAnswer(false)">C) Do nothing; the Plaintiff must prove their case first.</button>
+            <button onclick="nextStep(1)">A) File an Answer immediately.</button><br><br>
+            <button onclick="nextStep(2)">B) Determine if a Rule 12(b) Motion is applicable.</button><br><br>
         </div>
         <p id="feedback" style="margin-top:20px; font-weight:bold;"></p>
     </div>
 </div>
 
 <script>
-function checkAnswer(isCorrect) {
+function nextStep(choice) {
+    const title = document.getElementById('step-title');
+    const scenario = document.getElementById('scenario');
+    const choices = document.getElementById('choices');
     const feedback = document.getElementById('feedback');
-    if (isCorrect) {
-        feedback.innerHTML = "Correct! Under Rule 12(b), you must raise certain defenses before filing an Answer. Discovery is premature at this stage.";
-        feedback.style.color = "#008350";
+
+    if (choice === 2) {
+        title.innerText = "Step 2: Responsive Pleading";
+        scenario.innerText = "Correct. Rule 12(b) motions must be made before pleading if possible. Now that you've preserved your defenses, what's next?";
+        choices.innerHTML = `
+            <button onclick="finalStep(true)">A) Proceed to Discovery (Rule 26).</button><br><br>
+            <button onclick="finalStep(false)">B) File an Appeal to the Supreme Court.</button>
+        `;
+        feedback.innerText = "";
     } else {
-        feedback.innerHTML = "Incorrect. Refer to Rule 12(b) regarding the timing of motions and responsive pleadings.";
+        feedback.innerText = "Not quite. Check Rule 12 regarding the timing of motions and waiver of defenses.";
         feedback.style.color = "red";
+    }
+}
+
+function finalStep(isCorrect) {
+    const scenario = document.getElementById('scenario');
+    const choices = document.getElementById('choices');
+    if (isCorrect) {
+        scenario.innerText = "Success! You have navigated the initial procedural hurdle. Your case is now ready for the Discovery phase.";
+        choices.innerHTML = "<button onclick='location.reload()'>Restart Simulation</button>";
+    } else {
+        alert("Final judgments are rarely appealable this early!");
     }
 }
 </script>
