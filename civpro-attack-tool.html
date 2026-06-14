@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Civ Pro Interactive Flowcharts</title>
+  <style>
+    :root {
+      --ink: #162033;
+      --muted: #637086;
+      --line: #d8e0ea;
+      --page: #f6f7fb;
+      --card: #ffffff;
+      --blue: #276ef1;
+      --teal: #0d9488;
+      --orange: #f59e0b;
+      --rose: #e11d48;
+      --violet: #7c3aed;
+      --green: #16a34a;
+      --shadow: 0 18px 45px rgba(22, 32, 51, .14);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--page);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% 9%, rgba(39, 110, 241, .13), transparent 28%),
+        radial-gradient(circle at 92% 18%, rgba(245, 158, 11, .14), transparent 26%),
+        radial-gradient(circle at 50% 100%, rgba(13, 148, 136, .12), transparent 32%),
+        var(--page);
+    }
+
+    button, textarea { font: inherit; }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 310px minmax(760px, 1fr);
+    }
+
+    .sidebar {
+      min-height: 100vh;
+      padding: 24px;
+      background: rgba(255, 255, 255, .8);
+      border-right: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: 0;
+      margin-bottom: 2px;
+    }
+
+    h2 {
+      font-size: 31px;
+      line-height: 1.12;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+    }
+
+    h3 {
+      font-size: 15px;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+    }
+
+    p, .fine {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .fine { font-size: 13px; }
+
+    .tool-tabs {
+      display: grid;
+      gap: 10px;
+      margin: 22px 0;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 8px;
+      min-height: 64px;
+      padding: 12px;
+      cursor: pointer;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 12px 1fr;
+      gap: 11px;
+      align-items: center;
+      box-shadow: 0 6px 16px rgba(22, 32, 51, .06);
+    }
+
+    .tab-dot {
+      width: 12px;
+      height: 42px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .tab[data-topic="pj"] .tab-dot { background: var(--teal); }
+    .tab[data-topic="smj"] .tab-dot { background: var(--orange); }
+
+    .tab[aria-selected="true"] {
+      outline: 3px solid rgba(39, 110, 241, .2);
+      border-color: var(--blue);
+    }
+
+    .tab[data-topic="pj"][aria-selected="true"] {
+      outline-color: rgba(13, 148, 136, .22);
+      border-color: var(--teal);
+    }
+
+    .tab[data-topic="smj"][aria-selected="true"] {
+      outline-color: rgba(245, 158, 11, .24);
+      border-color: var(--orange);
+    }
+
+    .tab strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .tab span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .side-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 42px;
+      padding: 9px 12px;
+      background: var(--card);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+
+    .btn.ghost { background: rgba(255,255,255,.6); }
+
+    .main {
+      padding: 28px;
+      overflow-x: auto;
+    }
+
+    .stage {
+      min-width: 980px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      max-width: 420px;
+    }
+
+    .chip {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.78);
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .chart-wrap {
+      background: rgba(255, 255, 255, .62);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .flowchart {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(250px, 1fr));
+      gap: 18px 22px;
+      position: relative;
+    }
+
+    .node {
+      min-height: 176px;
+      border-radius: 8px;
+      padding: 15px;
+      background: var(--card);
+      border: 2px solid transparent;
+      box-shadow: 0 10px 24px rgba(22, 32, 51, .08);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+      transition: transform .15s ease, border-color .15s ease, opacity .15s ease;
+      opacity: .62;
+    }
+
+    .node.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      border-color: var(--blue);
+    }
+
+    .topic-pj .node.active { border-color: var(--teal); }
+    .topic-smj .node.active { border-color: var(--orange); }
+
+    .node.done {
+      opacity: 1;
+      border-color: rgba(22, 163, 74, .52);
+    }
+
+    .node.result-node {
+      background: linear-gradient(135deg, rgba(22, 163, 74, .11), #fff);
+      border-color: rgba(22, 163, 74, .4);
+    }
+
+    .node.warn-node {
+      background: linear-gradient(135deg, rgba(225, 29, 72, .1), #fff);
+      border-color: rgba(225, 29, 72, .38);
+    }
+
+    .node-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: white;
+      background: var(--blue);
+      font-size: 11px;
+      text-transform: none;
+    }
+
+    .topic-pj .badge { background: var(--teal); }
+    .topic-smj .badge { background: var(--orange); }
+
+    .question {
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.22;
+    }
+
+    .plain {
+      color: var(--muted);
+      line-height: 1.42;
+      font-size: 13px;
+    }
+
+    .answers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .answer {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 8px 11px;
+      min-width: 70px;
+      cursor: pointer;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .answer.selected {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .topic-pj .answer.selected {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+
+    .topic-smj .answer.selected {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #1f2937;
+    }
+
+    .memo {
+      position: sticky;
+      top: 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(22, 32, 51, .08);
+    }
+
+    .result {
+      min-height: 170px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    .route {
+      display: grid;
+      gap: 8px;
+    }
+
+    .route-step {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .route-step b {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--blue);
+      font-size: 11px;
+    }
+
+    .topic-pj .route-step b { background: var(--teal); }
+    .topic-smj .route-step b { background: var(--orange); color: #1f2937; }
+
+    textarea {
+      width: 100%;
+      min-height: 136px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .export-modal {
+      position: fixed;
+      inset: 24px;
+      display: none;
+      place-items: center;
+      background: rgba(22, 32, 51, .4);
+      z-index: 10;
+    }
+
+    .export-modal.open { display: grid; }
+
+    .modal-card {
+      width: min(900px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      border-radius: 8px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    #exportText {
+      min-height: 430px;
+      font-family: Consolas, ui-monospace, SFMono-Regular, monospace;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1050px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { min-height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .tool-tabs { grid-template-columns: repeat(3, 1fr); }
+      .stage { min-width: 980px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Civ Pro Flowcharts</h1>
+        <p>Interactive, colorful, desktop-first decision tools for the three topics you picked.</p>
+      </div>
+
+      <nav class="tool-tabs" aria-label="Choose a Civ Pro flowchart">
+        <button class="tab" data-topic="erie" aria-selected="true">
+          <i class="tab-dot"></i>
+          <span><strong>Erie Doctrine</strong>State law, federal rule, Hanna tracks</span>
+        </button>
+        <button class="tab" data-topic="pj" aria-selected="false">
+          <i class="tab-dot"></i>
+          <span><strong>Personal Jurisdiction</strong>Long arm, contacts, fairness</span>
+        </button>
+        <button class="tab" data-topic="smj" aria-selected="false">
+          <i class="tab-dot"></i>
+          <span><strong>SMJ / Removal</strong>Federal question, diversity, removal</span>
+        </button>
+      </nav>
+
+      <div class="side-actions">
+        <button class="btn primary" id="exportBtn">Export answers</button>
+        <button class="btn ghost" id="copyBtn">Copy result</button>
+        <button class="btn ghost" id="resetBtn">Reset current chart</button>
+      </div>
+      <p class="fine">Answers and notes save in this browser only. This works as a single file on GitHub Pages.</p>
+    </aside>
+
+    <main class="main">
+      <div class="hero">
+        <div>
+          <h2 id="topicTitle">Erie Doctrine</h2>
+          <p id="topicSubtitle">Pick the path before you write the rule. The big exam move is choosing Hanna Part I or Part II.</p>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div class="stage" id="stage">
+        <section class="chart-wrap">
+          <div class="flowchart" id="flowchart"></div>
+        </section>
+
+        <aside class="memo">
+          <section class="panel">
+            <h3>Current Result</h3>
+            <div class="result" id="resultText"></div>
+          </section>
+          <section class="panel">
+            <h3>Your Path</h3>
+            <div class="route" id="routeText"></div>
+          </section>
+          <section class="panel">
+            <h3>Facts / Class Notes</h3>
+            <textarea id="notes" placeholder="Paste the professor's hypo facts or your own notes here."></textarea>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="export-modal" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2 id="exportTitle">Flowchart Export</h2>
+          <p class="fine">Copy this into your outline or practice exam answer.</p>
+        </div>
+        <button class="btn" id="closeExport">Close</button>
+      </div>
+      <textarea id="exportText"></textarea>
+    </div>
+  </div>
+
+  <script>
+    const storeKey = "civpro-flowcharts-v2";
+
+    const charts = {
+      erie: {
+        title: "Erie Doctrine",
+        subtitle: "Pick the path before you write the rule. The big exam move is choosing Hanna Part I or Part II.",
+        chips: ["Diversity", "Klaxon", "Hanna Part I", "Hanna Part II", "Rules Enabling Act"],
+        start: "trigger",
+        nodes: {
+          trigger: {
+            label: "Start",
+            question: "Is the federal court deciding a state-law claim?",
+            plain: "Erie usually shows up when a federal court hears state-created rights, especially diversity cases.",
+            answers: [
+              { text: "Yes", next: "conflict", note: "Erie is triggered." },
+              { text: "No", next: "noErie", note: "Erie probably is not the main issue." },
+              { text: "Unsure", next: "conflict", note: "Assume Erie may matter and identify the conflict." }
+            ]
+          },
+          conflict: {
+            label: "Conflict",
+            question: "Can you identify a real conflict between state law and federal law or practice?",
+            plain: "Name the state rule and the federal rule/practice. Vague 'state vs federal' talk loses points.",
+            answers: [
+              { text: "Yes", next: "choice", note: "There is a concrete conflict." },
+              { text: "No", next: "noConflict", note: "No true conflict means no hard Erie analysis." },
+              { text: "Need facts", next: "choice", note: "Flag the missing rule and keep analyzing." }
+            ]
+          },
+          choice: {
+            label: "Choice of Law",
+            question: "Have you used the forum state's choice-of-law rules?",
+            plain: "Klaxon says a federal diversity court uses the choice-of-law rules of the state where it sits.",
+            answers: [
+              { text: "Yes", next: "federalRule", note: "Klaxon handled." },
+              { text: "No", next: "federalRule", note: "Add a Klaxon sentence before the Hanna analysis." }
+            ]
+          },
+          federalRule: {
+            label: "Hanna Split",
+            question: "Does a Federal Rule, federal statute, or constitutional provision directly control?",
+            plain: "This is the fork. Federal Rule exists: Hanna Part II. No Federal Rule: Hanna Part I/York.",
+            answers: [
+              { text: "Yes", next: "validRule", note: "Use Hanna Part II." },
+              { text: "No", next: "twinEvils", note: "Use Hanna Part I." },
+              { text: "Maybe", next: "scope", note: "First decide whether the federal rule is broad enough." }
+            ]
+          },
+          scope: {
+            label: "Scope",
+            question: "Is the Federal Rule broad enough to cover the disputed issue?",
+            plain: "Do not force a Federal Rule onto facts it does not actually govern.",
+            answers: [
+              { text: "Yes", next: "validRule", note: "Federal Rule covers the issue." },
+              { text: "No", next: "twinEvils", note: "No direct Federal Rule, so use Hanna Part I." }
+            ]
+          },
+          validRule: {
+            label: "Validity",
+            question: "Is the Federal Rule valid under the Rules Enabling Act?",
+            plain: "The rule must be rationally capable of being procedural and must not alter substantive rights.",
+            answers: [
+              { text: "Yes", next: "federalWins", note: "Federal Rule likely controls." },
+              { text: "No", next: "stateWins", note: "Invalid federal rule cannot displace state law." },
+              { text: "Arguable", next: "federalWins", note: "Most FRCP rules survive this test." }
+            ]
+          },
+          twinEvils: {
+            label: "Twin Evils",
+            question: "Would federal practice encourage forum shopping or unfair administration?",
+            plain: "Hanna Part I asks whether different federal practice would change litigant behavior or create inequality.",
+            answers: [
+              { text: "Yes", next: "stateWins", note: "State law likely controls." },
+              { text: "No", next: "federalPractice", note: "Federal practice likely controls." },
+              { text: "Close", next: "balance", note: "Discuss York and Hanna policy." }
+            ]
+          },
+          balance: {
+            label: "Balance",
+            question: "Is the state rule bound up with substantive rights?",
+            plain: "Statutes of limitations often count as substantive in diversity, even though they look procedural.",
+            answers: [
+              { text: "Yes", next: "stateWins", note: "Substantive state rule likely controls." },
+              { text: "No", next: "federalPractice", note: "Federal practice likely controls." }
+            ]
+          },
+          federalWins: { label: "Result", result: true, good: true, question: "Federal Rule controls.", plain: "Write: Under Hanna Part II, the valid Federal Rule governs even if state law points the other way." },
+          federalPractice: { label: "Result", result: true, good: true, question: "Federal practice controls.", plain: "Write: Under Hanna Part I, using federal practice does not create the twin evils Erie was designed to prevent." },
+          stateWins: { label: "Result", result: true, warn: true, question: "State law controls.", plain: "Write: Applying federal practice would risk forum shopping or inequitable administration, so the federal court should apply state law." },
+          noConflict: { label: "Result", result: true, question: "No Erie problem yet.", plain: "If both rules can operate together, say there is no direct conflict and apply the ordinary rule." },
+          noErie: { label: "Result", result: true, question: "Erie is probably not the main doctrine.", plain: "If the claim arises under federal law, look first to federal statutes, FRCP, and federal common law limits." }
+        }
+      },
+      pj: {
+        title: "Personal Jurisdiction",
+        subtitle: "Move from statutory permission to constitutional fairness. Contacts first, fairness second.",
+        chips: ["Long arm", "General PJ", "Specific PJ", "Minimum contacts", "Fairness"],
+        start: "longarm",
+        nodes: {
+          longarm: {
+            label: "Start",
+            question: "Does the forum's long-arm statute authorize jurisdiction?",
+            plain: "A court needs a statute before the Constitution question matters.",
+            answers: [
+              { text: "Yes", next: "service", note: "Statutory basis exists." },
+              { text: "No", next: "noPJ", note: "No statutory authorization." },
+              { text: "Due process limit", next: "service", note: "Long arm reaches as far as due process allows." }
+            ]
+          },
+          service: {
+            label: "Service",
+            question: "Was service proper, waived, or consented to?",
+            plain: "Bad service can sink PJ, but a defendant can waive or consent.",
+            answers: [
+              { text: "Yes", next: "general", note: "Service/consent is okay." },
+              { text: "No", next: "noPJ", note: "Service problem." },
+              { text: "Waived", next: "pjLikely", note: "Waiver or consent can establish PJ." }
+            ]
+          },
+          general: {
+            label: "General PJ",
+            question: "Is the defendant at home in the forum?",
+            plain: "People are at home where domiciled. Corporations are usually at home where incorporated or headquartered.",
+            answers: [
+              { text: "Yes", next: "pjLikely", note: "General jurisdiction exists." },
+              { text: "No", next: "tag", note: "Need specific jurisdiction or another basis." },
+              { text: "Exceptional", next: "pjLikely", note: "Rare exceptional general jurisdiction argument." }
+            ]
+          },
+          tag: {
+            label: "Tag / Consent",
+            question: "Was the defendant served while voluntarily present, or did they consent?",
+            plain: "Burnham supports tag jurisdiction. Contracts and failure to object can also matter.",
+            answers: [
+              { text: "Yes", next: "pjLikely", note: "Tag or consent supports PJ." },
+              { text: "No", next: "contact", note: "Analyze specific jurisdiction." }
+            ]
+          },
+          contact: {
+            label: "Contacts",
+            question: "Did the defendant create contacts with the forum?",
+            plain: "The plaintiff's unilateral move is not enough. The defendant must connect itself to the forum.",
+            answers: [
+              { text: "Yes", next: "purpose", note: "Defendant-created contacts exist." },
+              { text: "No", next: "noPJ", note: "No defendant-created forum contact." },
+              { text: "Stream only", next: "stream", note: "Stream-of-commerce issue." }
+            ]
+          },
+          stream: {
+            label: "Stream",
+            question: "Are there plus factors showing the defendant targeted the forum?",
+            plain: "Advertising, customization, advice, distribution design, or forum-specific sales can help.",
+            answers: [
+              { text: "Yes", next: "related", note: "Plus factors support purposeful direction." },
+              { text: "No", next: "noPJ", note: "Mere foreseeability is weak." },
+              { text: "Split law", next: "fairness", note: "Discuss Asahi/Nicastro uncertainty." }
+            ]
+          },
+          purpose: {
+            label: "Purpose",
+            question: "Is there purposeful availment or purposeful direction?",
+            plain: "Contracts, repeated business, targeting, marketing, or deliberate forum conduct can satisfy this.",
+            answers: [
+              { text: "Yes", next: "related", note: "Purposeful availment exists." },
+              { text: "No", next: "noPJ", note: "No purposeful availment." },
+              { text: "Close", next: "related", note: "Purposeful availment is arguable." }
+            ]
+          },
+          related: {
+            label: "Relatedness",
+            question: "Does the claim arise out of or relate to the forum contacts?",
+            plain: "Ford says relatedness can be enough even without strict causation.",
+            answers: [
+              { text: "Yes", next: "fairness", note: "Relatedness satisfied." },
+              { text: "No", next: "noPJ", note: "Contacts are unrelated to this claim." },
+              { text: "Ford argument", next: "fairness", note: "Use Ford's relates-to language." }
+            ]
+          },
+          fairness: {
+            label: "Fairness",
+            question: "Would jurisdiction be fair and reasonable?",
+            plain: "Use burden, forum interest, plaintiff interest, efficiency, and shared policy interests.",
+            answers: [
+              { text: "Yes", next: "pjLikely", note: "Fairness supports PJ." },
+              { text: "No", next: "noPJ", note: "Fairness defeats PJ." },
+              { text: "Close", next: "pjMaybe", note: "Contacts and fairness are debatable." }
+            ]
+          },
+          pjLikely: { label: "Result", result: true, good: true, question: "Personal jurisdiction likely exists.", plain: "Write the basis clearly: general, tag/consent, or specific jurisdiction with contacts, relatedness, and fairness." },
+          pjMaybe: { label: "Result", result: true, question: "Personal jurisdiction is arguable.", plain: "Write both sides. Close PJ questions usually turn on purposeful availment, relatedness, or fairness." },
+          noPJ: { label: "Result", result: true, warn: true, question: "Personal jurisdiction likely fails.", plain: "Name the missing piece: long-arm statute, service, at-home status, defendant-created contact, relatedness, or fairness." }
+        }
+      },
+      smj: {
+        title: "SMJ / Removal",
+        subtitle: "Federal courts need a door in. Removal only works if the case could have started in federal court.",
+        chips: ["Federal question", "Diversity", "Supplemental", "Removal", "Remand"],
+        start: "original",
+        nodes: {
+          original: {
+            label: "Start",
+            question: "Could this case have been filed in federal court originally?",
+            plain: "Look for federal question, diversity, or another jurisdiction statute.",
+            answers: [
+              { text: "Yes", next: "fq", note: "Original jurisdiction may exist." },
+              { text: "No", next: "noSMJ", note: "No original federal jurisdiction." },
+              { text: "Unsure", next: "fq", note: "Test federal question, then diversity." }
+            ]
+          },
+          fq: {
+            label: "Federal Question",
+            question: "Does federal law appear on the face of the well-pleaded complaint?",
+            plain: "Mottley: anticipated federal defenses do not create federal question jurisdiction.",
+            answers: [
+              { text: "Yes", next: "created", note: "Possible federal question." },
+              { text: "No", next: "diversity", note: "No ordinary federal question." },
+              { text: "State claim with federal issue", next: "grable", note: "Check embedded federal issue." }
+            ]
+          },
+          created: {
+            label: "Cause of Action",
+            question: "Does federal law create the plaintiff's cause of action?",
+            plain: "The Holmes test solves most federal question cases.",
+            answers: [
+              { text: "Yes", next: "smjLikely", note: "Federal question jurisdiction likely." },
+              { text: "No", next: "grable", note: "Check Grable embedded issue." }
+            ]
+          },
+          grable: {
+            label: "Embedded Issue",
+            question: "Is the federal issue necessary, disputed, substantial, and balance-friendly?",
+            plain: "This path is rare. Do not overuse it for ordinary state claims.",
+            answers: [
+              { text: "Yes", next: "smjLikely", note: "Grable may support FQJ." },
+              { text: "No", next: "diversity", note: "No embedded federal jurisdiction." }
+            ]
+          },
+          diversity: {
+            label: "Diversity",
+            question: "Is there complete diversity between all plaintiffs and all defendants?",
+            plain: "No plaintiff can share citizenship with any defendant.",
+            answers: [
+              { text: "Yes", next: "amount", note: "Complete diversity exists." },
+              { text: "No", next: "supplemental", note: "Diversity fails unless another hook exists." },
+              { text: "Need domicile", next: "domicile", note: "Citizenship needs more facts." }
+            ]
+          },
+          domicile: {
+            label: "Citizenship",
+            question: "Can you establish citizenship at the time of filing?",
+            plain: "Individuals: domicile. Corporations: incorporation and principal place of business.",
+            answers: [
+              { text: "Yes", next: "amount", note: "Citizenship established." },
+              { text: "No", next: "supplemental", note: "Diversity is not established." }
+            ]
+          },
+          amount: {
+            label: "Amount",
+            question: "Does the amount in controversy exceed $75,000?",
+            plain: "Use plaintiff's good-faith amount unless it is legally certain the claim is too low.",
+            answers: [
+              { text: "Yes", next: "smjLikely", note: "Diversity jurisdiction likely." },
+              { text: "No", next: "supplemental", note: "Diversity amount fails." },
+              { text: "Close", next: "smjMaybe", note: "Discuss legal certainty." }
+            ]
+          },
+          supplemental: {
+            label: "Supplemental",
+            question: "Is there another claim with original jurisdiction and the same factual core?",
+            plain: "Section 1367 needs a common nucleus of operative fact.",
+            answers: [
+              { text: "Yes", next: "limit1367", note: "Supplemental jurisdiction may apply." },
+              { text: "No", next: "noSMJ", note: "No jurisdictional hook." }
+            ]
+          },
+          limit1367: {
+            label: "1367 Limits",
+            question: "Does § 1367(b) block the claim in a diversity-only case?",
+            plain: "Watch plaintiff-side claims involving Rules 14, 19, 20, and 24.",
+            answers: [
+              { text: "No", next: "smjLikely", note: "Supplemental jurisdiction likely." },
+              { text: "Yes", next: "noSMJ", note: "Supplemental jurisdiction blocked." },
+              { text: "Discretion", next: "smjMaybe", note: "Court may decline under 1367(c)." }
+            ]
+          },
+          removal: {
+            label: "Removal",
+            question: "If removed, did all served defendants consent and remove on time?",
+            plain: "Usually 30 days; all properly joined and served defendants must consent.",
+            answers: [
+              { text: "Yes", next: "forumDef", note: "Procedure likely okay." },
+              { text: "No", next: "remand", note: "Procedural removal defect." }
+            ]
+          },
+          forumDef: {
+            label: "Forum Defendant",
+            question: "For diversity removal, is a properly joined and served defendant from the forum state?",
+            plain: "The forum defendant rule blocks diversity removal, but not federal question removal.",
+            answers: [
+              { text: "Yes", next: "remand", note: "Forum defendant rule problem." },
+              { text: "No", next: "smjLikely", note: "Removal likely okay if SMJ exists." },
+              { text: "Federal question case", next: "smjLikely", note: "Forum defendant rule does not block FQ removal." }
+            ]
+          },
+          smjLikely: { label: "Result", result: true, good: true, question: "Federal SMJ likely exists.", plain: "If this is a removal question, still check district embracing the state court, consent, timing, and forum defendant limits." },
+          smjMaybe: { label: "Result", result: true, question: "SMJ is arguable.", plain: "Write the strongest hook and the weakness: amount, domicile, Grable substantiality, or 1367 discretion." },
+          noSMJ: { label: "Result", result: true, warn: true, question: "Federal SMJ likely fails.", plain: "SMJ cannot be waived. If the case was removed, remand is likely." },
+          remand: { label: "Result", result: true, warn: true, question: "Remand likely.", plain: "Separate SMJ defects from procedural removal defects. Non-SMJ removal objections usually need a timely remand motion." }
+        },
+        afterResult: ["removal", "forumDef"]
+      }
+    };
+
+    let activeTopic = "erie";
+    let state = loadState();
+
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(storeKey)) || {}; }
+      catch { return {}; }
+    }
+
+    function saveState() {
+      localStorage.setItem(storeKey, JSON.stringify(state));
+    }
+
+    function topicState(topic = activeTopic) {
+      state[topic] ||= { answers: {}, route: [charts[topic].start], notes: "" };
+      return state[topic];
+    }
+
+    function answerNode(nodeId, answer) {
+      const current = topicState();
+      current.answers[nodeId] = answer.text;
+      const existingIndex = current.route.indexOf(nodeId);
+      const baseRoute = existingIndex >= 0 ? current.route.slice(0, existingIndex + 1) : current.route.concat(nodeId);
+      current.route = answer.next ? baseRoute.concat(answer.next) : baseRoute;
+      saveState();
+      render();
+    }
+
+    function setTopic(topic) {
+      activeTopic = topic;
+      topicState(topic);
+      render();
+    }
+
+    function render() {
+      const chart = charts[activeTopic];
+      const current = topicState();
+      document.body.className = `topic-${activeTopic}`;
+      document.getElementById("stage").className = `stage topic-${activeTopic}`;
+      document.getElementById("topicTitle").textContent = chart.title;
+      document.getElementById("topicSubtitle").textContent = chart.subtitle;
+      document.getElementById("legend").innerHTML = chart.chips.map(chip => `<span class="chip">${chip}</span>`).join("");
+      document.querySelectorAll(".tab").forEach(tab => tab.setAttribute("aria-selected", String(tab.dataset.topic === activeTopic)));
+      renderNodes(chart, current);
+      renderMemo(chart, current);
+      const notes = document.getElementById("notes");
+      if (notes.value !== current.notes) notes.value = current.notes || "";
+    }
+
+    function renderNodes(chart, current) {
+      const flowchart = document.getElementById("flowchart");
+      const visible = new Set(current.route);
+      if (chart.afterResult && current.route.some(id => chart.nodes[id] && chart.nodes[id].result)) {
+        chart.afterResult.forEach(id => visible.add(id));
+      }
+      flowchart.innerHTML = Object.entries(chart.nodes).map(([id, node]) => {
+        if (!visible.has(id)) return "";
+        const isLast = current.route[current.route.length - 1] === id;
+        const answered = current.answers[id];
+        const cls = ["node"];
+        if (isLast && !node.result) cls.push("active");
+        if (answered || node.result) cls.push("done");
+        if (node.result) cls.push("result-node");
+        if (node.warn) cls.push("warn-node");
+        const answers = node.result ? "" : `<div class="answers">${node.answers.map(answer => {
+          const selected = answered === answer.text ? " selected" : "";
+          return `<button class="answer${selected}" data-node="${id}" data-answer="${answer.text}">${answer.text}</button>`;
+        }).join("")}</div>`;
+        return `
+          <article class="${cls.join(" ")}">
+            <div class="node-label"><span>${node.label}</span><span class="badge">${id}</span></div>
+            <div>
+              <div class="question">${node.question}</div>
+              <div class="plain">${node.plain}</div>
+            </div>
+            ${answers}
+          </article>`;
+      }).join("");
+      flowchart.querySelectorAll(".answer").forEach(button => {
+        button.addEventListener("click", () => {
+          const node = chart.nodes[button.dataset.node];
+          const answer = node.answers.find(item => item.text === button.dataset.answer);
+          answerNode(button.dataset.node, answer);
+        });
+      });
+    }
+
+    function renderMemo(chart, current) {
+      const lastId = current.route[current.route.length - 1];
+      const last = chart.nodes[lastId];
+      const result = last && last.result ? last : findNearestResult(chart, current);
+      document.getElementById("resultText").textContent = result
+        ? `${result.question}\n\n${result.plain}`
+        : "Answer the highlighted node to continue through the flowchart.";
+      document.getElementById("routeText").innerHTML = current.route.map((id, index) => {
+        const node = chart.nodes[id];
+        const answer = current.answers[id];
+        return `<div class="route-step"><b>${index + 1}</b><span>${node.label}: ${answer ? answer : node.question}</span></div>`;
+      }).join("");
+    }
+
+    function findNearestResult(chart, current) {
+      const lastId = current.route[current.route.length - 1];
+      const node = chart.nodes[lastId];
+      if (!node || !node.answers) return null;
+      const yes = node.answers.find(answer => /yes|federal|no/i.test(answer.text));
+      return yes && chart.nodes[yes.next] && chart.nodes[yes.next].result ? chart.nodes[yes.next] : null;
+    }
+
+    function exportCurrent() {
+      const chart = charts[activeTopic];
+      const current = topicState();
+      const path = current.route.map(id => {
+        const node = chart.nodes[id];
+        const answer = current.answers[id] ? `Answer: ${current.answers[id]}` : "Not answered yet";
+        return `- ${node.label}: ${node.question}\n  ${answer}`;
+      }).join("\n");
+      const lastId = current.route[current.route.length - 1];
+      const last = chart.nodes[lastId];
+      const result = last && last.result ? `${last.question}\n${last.plain}` : document.getElementById("resultText").textContent;
+      return `${chart.title}\n\nFacts / Notes:\n${current.notes || ""}\n\nPath:\n${path}\n\nResult:\n${result}`;
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => setTopic(tab.dataset.topic));
+    });
+
+    document.getElementById("notes").addEventListener("input", event => {
+      topicState().notes = event.target.value;
+      saveState();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      state[activeTopic] = { answers: {}, route: [charts[activeTopic].start], notes: topicState().notes || "" };
+      saveState();
+      render();
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(document.getElementById("resultText").textContent);
+      document.getElementById("copyBtn").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyBtn").textContent = "Copy result", 1100);
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      document.getElementById("exportText").value = exportCurrent();
+      document.getElementById("exportModal").classList.add("open");
+    });
+
+    document.getElementById("closeExport").addEventListener("click", () => {
+      document.getElementById("exportModal").classList.remove("open");
+    });
+
+    topicState("erie");
+    topicState("pj");
+    topicState("smj");
+    render();
+  </script>
+</body>
+</html>
