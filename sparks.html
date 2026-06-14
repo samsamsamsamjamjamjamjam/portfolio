@@ -1,60 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kayla Howsare | Law Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header>
-    <div class="logo">KAYLA HOWSARE | CIVIL PROCEDURE SIMULATOR</div>
-    <nav><a href="index.html">HOME</a></nav>
-</header>
+<style>
+    .timeline { display: flex; justify-content: space-between; margin: 40px 0; overflow-x: auto; gap: 5px; }
+    .step { flex: 1; padding: 20px; text-align: center; color: white; cursor: pointer; transition: 0.3s; font-weight: bold; border-radius: 8px; font-size: 0.9em; }
+    .step:hover { opacity: 0.9; transform: scale(1.02); }
+    
+    /* Color Legend: Plaintiff (Blue), Defendant (Red), Both (Purple) */
+    .p-plaintiff { background-color: #3498db; }
+    .p-defendant { background-color: #e74c3c; }
+    .p-both { background-color: #8e44ad; }
 
-<div class="hero" style="padding: 40px 20px;">
-    <h2 id="step-title">Step 1: The Complaint</h2>
-    <div id="game-container">
-        <p id="scenario">You are served a complaint. What is your first procedural priority under the FRCP?</p>
-        <div id="choices">
-            <button onclick="nextStep(1)">A) File an Answer immediately.</button><br><br>
-            <button onclick="nextStep(2)">B) Determine if a Rule 12(b) Motion is applicable.</button><br><br>
-        </div>
-        <p id="feedback" style="margin-top:20px; font-weight:bold;"></p>
-    </div>
+    #info-box { padding: 20px; background: #f4f4f4; border-left: 5px solid #333; margin-top: 20px; min-height: 100px; }
+</style>
+
+<div class="timeline">
+    <div class="step p-plaintiff" onclick="showInfo('Complaint')">Complaint (P)</div>
+    <div class="step p-defendant" onclick="showInfo('Answer')">Answer/Motion (D)</div>
+    <div class="step p-both" onclick="showInfo('Discovery')">Discovery (Both)</div>
+    <div class="step p-both" onclick="showInfo('Pretrial')">Pretrial (Both)</div>
+    <div class="step p-both" onclick="showInfo('Trial')">Trial (Both)</div>
+    <div class="step p-both" onclick="showInfo('Appeal')">Appeal (Both)</div>
 </div>
 
+<div id="info-box"><h3>Click a phase to learn more.</h3></div>
+
 <script>
-function nextStep(choice) {
-    const title = document.getElementById('step-title');
-    const scenario = document.getElementById('scenario');
-    const choices = document.getElementById('choices');
-    const feedback = document.getElementById('feedback');
-
-    if (choice === 2) {
-        title.innerText = "Step 2: Responsive Pleading";
-        scenario.innerText = "Correct. Rule 12(b) motions must be made before pleading if possible. Now that you've preserved your defenses, what's next?";
-        choices.innerHTML = `
-            <button onclick="finalStep(true)">A) Proceed to Discovery (Rule 26).</button><br><br>
-            <button onclick="finalStep(false)">B) File an Appeal to the Supreme Court.</button>
-        `;
-        feedback.innerText = "";
-    } else {
-        feedback.innerText = "Not quite. Check Rule 12 regarding the timing of motions and waiver of defenses.";
-        feedback.style.color = "red";
-    }
-}
-
-function finalStep(isCorrect) {
-    const scenario = document.getElementById('scenario');
-    const choices = document.getElementById('choices');
-    if (isCorrect) {
-        scenario.innerText = "Success! You have navigated the initial procedural hurdle. Your case is now ready for the Discovery phase.";
-        choices.innerHTML = "<button onclick='location.reload()'>Restart Simulation</button>";
-    } else {
-        alert("Final judgments are rarely appealable this early!");
-    }
+function showInfo(phase) {
+    const info = {
+        'Complaint': '<strong>Plaintiff:</strong> Files the complaint to initiate the action.',
+        'Answer': '<strong>Defendant:</strong> Files an answer, asserts defenses, or moves to dismiss.',
+        'Discovery': '<strong>Both Parties:</strong> Investigate facts, take discovery, file and argue motions.',
+        'Pretrial': '<strong>Both Parties:</strong> Pretrial conference, possible motions for summary judgment or on evidentiary issues.',
+        'Trial': '<strong>Both Parties:</strong> Opening/closing statements, evidence, jury instructions, deliberation, and verdict.',
+        'Appeal': '<strong>Both Parties:</strong> Losing party may appeal errors of law to a higher court.'
+    };
+    document.getElementById('info-box').innerHTML = `<h3>${phase} Phase</h3><p>${info[phase]}</p>`;
 }
 </script>
-</body>
-</html>
