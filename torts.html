@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Torts Interactive Tools</title>
+  <style>
+    :root {
+      --wilmu-green: #008350;
+      --deep-text-green: #003320;
+      --canvas-white: #F9FBF9;
+      --body-charcoal: #2B2B2B;
+      --line: #dce3ee;
+      --muted: #53645d;
+      --slate: #31465c;
+      --steel: #6f8498;
+      --blue: #496f9e;
+      --burgundy: #8f4e5f;
+      --teal: #4a8f89;
+      --amber: #b9872f;
+      --danger: #b94b4b;
+      --shadow: 0 16px 42px rgba(0, 51, 32, .18);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--deep-text-green);
+      background: var(--canvas-white);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgba(0, 131, 80, .96), rgba(0, 51, 32, .92));
+    }
+    button, input, select { font: inherit; }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 320px minmax(820px, 1fr);
+    }
+    .side {
+      min-height: 100vh;
+      padding: 24px;
+      background: rgba(249, 251, 249, .94);
+      border-right: 1px solid var(--line);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      font-size: 28px;
+      line-height: 1.08;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: 0;
+      margin-bottom: 10px;
+    }
+    h3 {
+      font-size: 17px;
+      letter-spacing: 0;
+      margin-bottom: 10px;
+    }
+    p, .small {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .small { font-size: 13px; }
+    .tabs {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .tab {
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--canvas-white);
+      color: var(--deep-text-green);
+      padding: 10px 12px;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 13px 1fr;
+      gap: 10px;
+      align-items: center;
+      box-shadow: 0 8px 18px rgba(0, 51, 32, .08);
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .tab i {
+      width: 13px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--wilmu-green);
+    }
+    .tab[aria-selected="true"] {
+      border-color: var(--wilmu-green);
+      outline: 3px solid rgba(0, 131, 80, .18);
+    }
+    .main {
+      padding: 28px;
+      overflow-x: auto;
+    }
+    .main-inner {
+      max-width: 1180px;
+      min-width: 820px;
+    }
+    .header-card, .panel, .tool-card {
+      background: rgba(249, 251, 249, .96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .header-card {
+      border-left: 8px solid var(--wilmu-green);
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .tool { display: none; }
+    .tool.active { display: block; }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+    .tool-card, .panel {
+      padding: 16px;
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      font-weight: 900;
+      color: var(--deep-text-green);
+      margin-bottom: 12px;
+    }
+    select, input[type="number"], input[type="range"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      color: var(--body-charcoal);
+    }
+    input[type="range"] {
+      accent-color: var(--wilmu-green);
+      padding: 0;
+    }
+    .btn, .choice-btn, .rule-btn {
+      min-height: 48px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--deep-text-green);
+      font-weight: 950;
+      cursor: pointer;
+      padding: 10px;
+    }
+    .btn.active, .choice-btn.active, .rule-btn.active {
+      border-color: var(--wilmu-green);
+      background: #e7f4ee;
+    }
+    .result-box {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      line-height: 1.5;
+      color: var(--body-charcoal);
+      font-weight: 800;
+      min-height: 88px;
+    }
+    .status-good {
+      border-color: rgba(0, 131, 80, .45);
+      background: #e7f4ee;
+    }
+    .status-bad {
+      border-color: rgba(185, 75, 75, .45);
+      background: #f8e9e9;
+    }
+
+    /* BPL simulator */
+    .hand-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .bpl-scale {
+      position: relative;
+      height: 430px;
+      border-radius: 8px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 24%, rgba(255,255,255,.82), transparent 29%),
+        linear-gradient(180deg, #f8faf7, #dce8e2);
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 34px rgba(0, 51, 32, .2);
+      display: grid;
+      place-items: center;
+    }
+    .scale-stand {
+      position: absolute;
+      bottom: 74px;
+      width: 150px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--deep-text-green);
+    }
+    .scale-stand::before {
+      content: "";
+      position: absolute;
+      left: 67px;
+      bottom: 13px;
+      width: 16px;
+      height: 150px;
+      border-radius: 999px;
+      background: var(--deep-text-green);
+    }
+    .scale-stand::after {
+      content: "";
+      position: absolute;
+      left: 55px;
+      bottom: 160px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--wilmu-green);
+      border: 5px solid var(--deep-text-green);
+    }
+    .scale-beam {
+      position: absolute;
+      top: 150px;
+      width: 278px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--wilmu-green);
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform .18s ease;
+      box-shadow: 0 8px 18px rgba(0, 51, 32, .18);
+    }
+    .scale-pan {
+      display: none;
+    }
+    .scale-caption {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      border-radius: 8px;
+      background: rgba(0, 51, 32, .86);
+      color: #fff;
+      padding: 10px 12px;
+      text-align: center;
+      font-weight: 950;
+    }
+    .formula-readout {
+      display: grid;
+      gap: 12px;
+    }
+    .slider-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .slider-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .formula-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .formula-cell {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      font-weight: 950;
+    }
+    .hand-result-row {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+    .hand-result-photo {
+      min-height: 150px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: #dfe6e2;
+      box-shadow: 0 10px 22px rgba(0, 51, 32, .13);
+    }
+    .hand-result-photo img {
+      width: 100%;
+      height: 100%;
+      min-height: 150px;
+      object-fit: cover;
+      object-position: center 24%;
+      filter: grayscale(100%) contrast(1.05);
+      display: block;
+    }
+
+    /* Guided flowcharts */
+    .pathway {
+      display: grid;
+      gap: 14px;
+    }
+    .step {
+      position: relative;
+      background: rgba(249, 251, 249, .98);
+      border: 2px solid var(--line);
+      border-left: 9px solid var(--wilmu-green);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      animation: rise .16s ease-out;
+    }
+    .step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 42px;
+      bottom: -18px;
+      width: 4px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(0, 131, 80, .45);
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .step-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .step-number {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--wilmu-green);
+      color: #fff;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+    .question {
+      font-size: 22px;
+      line-height: 1.25;
+      font-weight: 950;
+      margin-bottom: 14px;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .choice {
+      min-height: 56px;
+      padding: 11px 12px;
+      text-align: center;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--deep-text-green);
+      font-weight: 950;
+      cursor: pointer;
+    }
+    .choice.selected {
+      border-color: var(--wilmu-green);
+      background: #e7f4ee;
+    }
+    .result {
+      background: linear-gradient(135deg, #e7f4ee, var(--canvas-white));
+      border-color: rgba(0, 131, 80, .45);
+    }
+    .result-text {
+      color: var(--body-charcoal);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    /* Comparative fault */
+    .wheel-layout {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+    .wheel {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: conic-gradient(var(--burgundy) 0 var(--pf), var(--blue) var(--pf) 100%);
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 0 0 24px rgba(255,255,255,.78), 0 12px 28px rgba(0,0,0,.12);
+    }
+    .wheel-center {
+      width: 124px;
+      height: 124px;
+      border-radius: 50%;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-weight: 950;
+      color: var(--deep-text-green);
+      padding: 10px;
+    }
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    /* Intentional torts house */
+    .house-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 18px;
+      align-items: start;
+    }
+    .house-canvas {
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #fff, #edf4f1);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .house {
+      width: 360px;
+      height: 330px;
+      position: relative;
+    }
+    .foundation, .wall, .roof {
+      position: absolute;
+      opacity: .22;
+      transition: opacity .18s ease, transform .18s ease, background .18s ease;
+    }
+    .built { opacity: 1; }
+    .foundation {
+      left: 42px;
+      bottom: 28px;
+      width: 276px;
+      height: 42px;
+      border-radius: 8px;
+      background: var(--slate);
+    }
+    .foundation.cracked {
+      background: var(--danger);
+      transform: rotate(-1deg);
+    }
+    .wall {
+      width: 112px;
+      height: 132px;
+      bottom: 70px;
+      background: #8aa0b6;
+      border: 4px solid var(--slate);
+    }
+    .wall.one { left: 65px; }
+    .wall.two { right: 65px; }
+    .roof {
+      left: 40px;
+      bottom: 198px;
+      width: 280px;
+      height: 118px;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: #6e7f92;
+      border: 0;
+    }
+    .block-grid {
+      display: grid;
+      gap: 8px;
+    }
+    .block-btn {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      text-align: left;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .block-btn.correct {
+      border-color: var(--wilmu-green);
+      background: #e7f4ee;
+    }
+    .block-btn.incorrect {
+      border-color: var(--danger);
+      background: #f8e9e9;
+      animation: shake .18s ease-in-out 2;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(-5px); }
+    }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .side { min-height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .main-inner { min-width: 0; }
+      .grid, .hand-layout, .wheel-layout, .house-layout { grid-template-columns: 1fr; }
+      .slider-grid, .rules, .formula-strip { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <h1>Torts Interactive Tools</h1>
+      <p>Click the concept!</p>
+      <nav class="tabs" id="tabs"></nav>
+    </aside>
+    <main class="main">
+      <div class="main-inner">
+        <section class="header-card">
+          <h2 id="title"></h2>
+        </section>
+
+        <section class="tool active" id="hand">
+          <div class="tool-card hand-layout">
+            <div class="bpl-scale">
+              <div class="scale-stand"></div>
+              <div class="scale-beam" id="scaleBeam"></div>
+              <div class="scale-pan left" aria-hidden="true"></div>
+              <div class="scale-pan right" aria-hidden="true"></div>
+              <div class="scale-caption" id="scaleCaption">Balance the burden against the expected harm.</div>
+            </div>
+            <div class="formula-readout">
+              <div class="slider-grid">
+                <div class="slider-card"><label>Burden (B): $<span id="bVal">50</span><input id="burden" type="range" min="0" max="200" value="50"></label></div>
+                <div class="slider-card"><label>Probability (P): <span id="pVal">25</span>%<input id="probability" type="range" min="0" max="100" value="25"></label></div>
+                <div class="slider-card"><label>Gravity of Loss (L): $<span id="lVal">500</span><input id="loss" type="range" min="0" max="1000" value="500"></label></div>
+              </div>
+              <div class="formula-strip">
+                <div class="formula-cell">B = <span id="bRead"></span></div>
+                <div class="formula-cell">P x L = <span id="riskRead"></span></div>
+                <div class="formula-cell" id="compareRead"></div>
+              </div>
+              <div class="hand-result-row">
+                <div class="hand-result-photo">
+                  <img id="handMood" src="learned-hand-not-negligent.png" alt="Learned Hand result portrait">
+                </div>
+                <div class="result-box" id="handResult"></div>
+              </div>
+              <p class="small">United States v. Carroll Towing frames negligence as a risk-utility comparison: if the burden of precaution is less than the expected harm, failure to take the precaution may be unreasonable.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool" id="products">
+          <div class="grid">
+            <div class="pathway" id="productsPath"></div>
+            <aside class="panel">
+              <h3>Product Liability Flowchart</h3>
+              <button class="btn active" id="restartProducts">Restart flowchart</button>
+            </aside>
+          </div>
+        </section>
+
+        <section class="tool" id="fault">
+          <div class="tool-card wheel-layout">
+            <div class="wheel" id="wheel"><div class="wheel-center" id="wheelLabel"></div></div>
+            <div>
+              <label>Total Verdict Before Fault Reduction<input id="totalDamages" type="number" value="100000"></label>
+              <label>Plaintiff Fault: <span id="pfVal">51</span>%<input id="plaintiffFault" type="range" min="0" max="100" value="51"></label>
+              <div class="rules">
+                <button class="rule-btn active" data-rule="pure">Pure Comparative Fault</button>
+                <button class="rule-btn" data-rule="modified">Modified Comparative Fault (50% Bar)</button>
+                <button class="rule-btn" data-rule="contrib">Contributory Negligence Bar</button>
+              </div>
+              <div class="result-box" id="faultResult"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool" id="house">
+          <div class="house-layout">
+            <div class="house-canvas">
+              <div class="house">
+                <div class="roof" id="houseRoof"></div>
+                <div class="wall one" id="wallOne"></div>
+                <div class="wall two" id="wallTwo"></div>
+                <div class="foundation" id="foundation"></div>
+              </div>
+            </div>
+            <aside class="panel">
+              <label>Select Intentional Tort
+                <select id="tortSelect"></select>
+              </label>
+              <h3 id="houseStep">Step 1: Foundation</h3>
+              <div class="block-grid" id="houseOptions"></div>
+              <div class="result-box" id="houseResult" style="margin-top:12px;"></div>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const tabs = [
+      ["hand", "BPL Simulator"],
+      ["products", "Product Liability Flowchart"],
+      ["fault", "Comparative and Contributory Damages Calculator"],
+      ["house", "Intentional Torts Prima Facie House Builder"]
+    ];
+    let activeTool = "hand";
+    let faultRule = "pure";
+
+    function money(n) {
+      return Number(n || 0).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+    }
+    function renderTabs() {
+      document.getElementById("tabs").innerHTML = tabs.map(([id, title]) => `<button class="tab" data-tab="${id}" aria-selected="${id === activeTool}"><i></i><span>${title}</span></button>`).join("");
+      document.querySelectorAll("[data-tab]").forEach(tab => tab.addEventListener("click", () => {
+        activeTool = tab.dataset.tab;
+        render();
+      }));
+    }
+    function render() {
+      renderTabs();
+      document.querySelectorAll(".tool").forEach(tool => tool.classList.toggle("active", tool.id === activeTool));
+      document.getElementById("title").textContent = tabs.find(([id]) => id === activeTool)[1];
+      updateHand();
+      renderProducts();
+      updateFault();
+      renderHouse();
+    }
+
+    function updateHand() {
+      const B = Number(document.getElementById("burden").value);
+      const P = Number(document.getElementById("probability").value) / 100;
+      const L = Number(document.getElementById("loss").value);
+      const risk = P * L;
+      const negligent = B < risk;
+      document.getElementById("bVal").textContent = B;
+      document.getElementById("pVal").textContent = Math.round(P * 100);
+      document.getElementById("lVal").textContent = L;
+      document.getElementById("bRead").textContent = money(B);
+      document.getElementById("riskRead").textContent = money(risk);
+      document.getElementById("compareRead").textContent = negligent ? "B < P x L" : "B >= P x L";
+      document.getElementById("scaleBeam").style.setProperty("--tilt", negligent ? "8deg" : "-8deg");
+      document.getElementById("scaleCaption").textContent = negligent ? "P x L outweighs B." : "B equals or outweighs P x L.";
+      const mood = document.getElementById("handMood");
+      mood.src = negligent ? "learned-hand-negligent.jpg" : "learned-hand-not-negligent.png";
+      mood.alt = negligent ? "Serious Learned Hand result portrait" : "Pleased Learned Hand result portrait";
+      const box = document.getElementById("handResult");
+      box.className = "result-box " + (negligent ? "status-bad" : "status-good");
+      box.textContent = negligent
+        ? `NEGLIGENT: Burden (${money(B)}) is less than P x L (${money(risk)}).`
+        : `NOT NEGLIGENT: Burden (${money(B)}) is greater than or equal to P x L (${money(risk)}).`;
+    }
+
+    const productFlow = {
+      start: "category",
+      nodes: {
+        category: q("Which theory would you like to test?", [
+          a("Manufacturing defect", "manufacturing"),
+          a("Design defect", "design"),
+          a("Warning defect", "warning")
+        ]),
+        manufacturing: q("Did this individual product depart from its intended design or blueprint?", [
+          a("Yes", "manufacturingControl"),
+          a("No", "notManufacturing")
+        ]),
+        manufacturingControl: q("Did the defect exist when the product left the defendant's control?", [
+          a("Yes", "manufacturingResult"),
+          a("No", "notManufacturing")
+        ]),
+        design: q("Is the claim that the whole product line is unreasonably dangerous as designed?", [
+          a("Yes", "rad"),
+          a("No", "category")
+        ]),
+        rad: q("Is there a feasible and economically reasonable alternative design?", [
+          a("Yes", "designResult"),
+          a("No", "notDesign")
+        ]),
+        warning: q("Is the claim that instructions or safety warnings were inadequate?", [
+          a("Yes", "warningAdequacy"),
+          a("No", "category")
+        ]),
+        warningAdequacy: q("Was the risk foreseeable and was the warning inadequate in content, visibility, or placement?", [
+          a("Yes", "warningResult"),
+          a("No", "notWarning")
+        ]),
+        manufacturingResult: r("Manufacturing defect path.", "The product appears to be a one-off anomaly that departed from its intended design while in defendant's control."),
+        notManufacturing: r("Manufacturing defect not established.", "A manufacturing defect requires a product that differs from its intended blueprint or specifications."),
+        designResult: r("Design defect path.", "A design defect argument is stronger when a reasonable alternative design was feasible and economically viable."),
+        notDesign: r("Design defect not established.", "Without a reasonable alternative design, the design defect theory is weaker."),
+        warningResult: r("Warning defect path.", "A warning defect argument is stronger if the risk was foreseeable and the warning was inadequate in content, visibility, or placement."),
+        notWarning: r("Warning defect not established.", "A warning defect requires an inadequate warning or instruction for a foreseeable risk.")
+      }
+    };
+    let productPath = [{ id: productFlow.start, answer: null }];
+    function q(question, choices) { return { type: "question", question, choices }; }
+    function a(label, next) { return { label, next }; }
+    function r(title, text) { return { type: "result", title, text }; }
+    function renderProducts() {
+      const pathway = document.getElementById("productsPath");
+      pathway.innerHTML = productPath.map((entry, index) => {
+        const node = productFlow.nodes[entry.id];
+        if (node.type === "result") {
+          return `<article class="step result"><div class="step-head"><span class="step-number">OK</span><span class="small">Result</span></div><div class="question">${node.title}</div><div class="result-text">${node.text}</div></article>`;
+        }
+        const choices = node.choices.map(choice => `<button class="choice ${entry.answer === choice.label ? "selected" : ""}" data-step="${index}" data-next="${choice.next}" data-label="${choice.label}">${choice.label}</button>`).join("");
+        return `<article class="step"><div class="step-head"><span class="step-number">${index + 1}</span><span class="small">Question ${index + 1}</span></div><div class="question">${node.question}</div><div class="choices">${choices}</div></article>`;
+      }).join("");
+      pathway.querySelectorAll(".choice").forEach(button => button.addEventListener("click", () => {
+        const i = Number(button.dataset.step);
+        const nextPath = productPath.slice(0, i + 1);
+        nextPath[i] = { ...nextPath[i], answer: button.dataset.label };
+        nextPath.push({ id: button.dataset.next, answer: null });
+        productPath = nextPath;
+        renderProducts();
+      }));
+    }
+
+    function updateFault() {
+      const total = Number(document.getElementById("totalDamages").value || 0);
+      const pf = Number(document.getElementById("plaintiffFault").value);
+      const df = 100 - pf;
+      document.getElementById("pfVal").textContent = pf;
+      document.getElementById("wheel").style.setProperty("--pf", pf + "%");
+      document.getElementById("wheelLabel").textContent = `${pf}% Plaintiff / ${df}% Defendant`;
+      document.querySelectorAll("[data-rule]").forEach(btn => btn.classList.toggle("active", btn.dataset.rule === faultRule));
+      let text = "";
+      if (faultRule === "pure") {
+        text = `Plaintiff recovers ${money(total * (df / 100))}. Damages are reduced by Plaintiff's ${pf}% fault.`;
+      } else if (faultRule === "modified") {
+        text = pf >= 50 ? "Plaintiff recovers $0. Recovery is barred because Plaintiff's fault meets or exceeds the 50% bar." : `Plaintiff recovers ${money(total * (df / 100))} under modified comparative fault.`;
+      } else {
+        text = pf > 0 ? "Plaintiff recovers $0. Any contributory fault completely bars recovery." : `Plaintiff recovers ${money(total)} because Plaintiff has no contributory fault.`;
+      }
+      document.getElementById("faultResult").textContent = text;
+    }
+
+    const torts = {
+      battery: ["Battery", ["Intentional harmful or offensive contact", "With plaintiff's person or connected items"], "Contact occurs and is offensive or unpermitted."],
+      assault: ["Assault", ["Volitional act, not words alone", "Reasonable apprehension of immediate battery"], "Plaintiff consciously perceives the threat before it ends."],
+      falseImprisonment: ["False Imprisonment", ["Act or omission confines or restrains", "Bounded area with no reasonable safe known escape"], "Plaintiff is aware of confinement or harmed by it."],
+      iied: ["IIED", ["Extreme and outrageous conduct", "Intent or recklessness"], "Severe emotional distress causing measurable damages."],
+      trespassLand: ["Trespass to Land", ["Physical invasion of real property", "Intent to enter the space"], "Entry occurs; actual damages are not required."],
+      trespassChattels: ["Trespass to Chattels", ["Intentional interference with personal property", "Minor intermeddling"], "Actual damage or denial of use occurs."],
+      conversion: ["Conversion", ["Intentional dominion or control over personal property", "Serious interference justifying full value"], "Total deprivation or destruction occurs."]
+    };
+    const allWalls = [...new Set(Object.values(torts).flatMap(t => t[1]))];
+    let house = { tort: "battery", step: "foundation", foundation: false, walls: [], roof: false, cracked: false, message: "" };
+    function renderHouse() {
+      const select = document.getElementById("tortSelect");
+      if (!select.options.length) {
+        select.innerHTML = Object.entries(torts).map(([key, t]) => `<option value="${key}">${t[0]}</option>`).join("");
+      }
+      select.value = house.tort;
+      document.getElementById("foundation").classList.toggle("built", house.foundation);
+      document.getElementById("foundation").classList.toggle("cracked", house.cracked);
+      document.getElementById("wallOne").classList.toggle("built", house.walls.length >= 1);
+      document.getElementById("wallTwo").classList.toggle("built", house.walls.length >= 2);
+      document.getElementById("houseRoof").classList.toggle("built", house.roof);
+      const title = document.getElementById("houseStep");
+      const options = document.getElementById("houseOptions");
+      if (house.step === "foundation") {
+        title.textContent = "Step 1: Foundation";
+        options.innerHTML = `<button class="block-btn" data-foundation="wrong">Intent to cause a specific injury</button><button class="block-btn" data-foundation="right">Intent to bring about the forbidden contact or act, including transferred intent</button>`;
+      } else if (house.step === "walls") {
+        title.textContent = "Step 2: Walls";
+        options.innerHTML = allWalls.map(w => `<button class="block-btn" data-wall="${w}">${w}</button>`).join("");
+      } else if (house.step === "roof") {
+        title.textContent = "Step 3: Roof";
+        options.innerHTML = `<button class="block-btn" data-roof="true">${torts[house.tort][2]}</button>`;
+      } else if (house.step === "complete") {
+        title.textContent = "Prima Facie Case Established";
+        options.innerHTML = "";
+      }
+      document.getElementById("houseResult").textContent = house.message || "Build the prima facie house from foundation to roof.";
+      options.querySelectorAll("[data-foundation]").forEach(btn => btn.addEventListener("click", () => {
+        if (btn.dataset.foundation === "right") {
+          house.foundation = true; house.cracked = false; house.step = "walls"; house.message = "Foundation set. Intent means intent to do the act or forbidden contact, not necessarily intent to cause the precise injury.";
+        } else {
+          house.cracked = true; house.message = "Foundation cracked. Intentional tort intent does not always require intent to cause a specific injury.";
+        }
+        renderHouse();
+      }));
+      options.querySelectorAll("[data-wall]").forEach(btn => btn.addEventListener("click", () => {
+        const needed = torts[house.tort][1];
+        if (needed.includes(btn.dataset.wall) && !house.walls.includes(btn.dataset.wall)) {
+          house.walls.push(btn.dataset.wall); house.message = "Compatible element placed.";
+          if (house.walls.length === 2) house.step = "roof";
+        } else {
+          house.message = "Incompatible element. This wall belongs to a different intentional tort.";
+        }
+        renderHouse();
+      }));
+      options.querySelectorAll("[data-roof]").forEach(btn => btn.addEventListener("click", () => {
+        house.roof = true; house.step = "complete"; house.message = "PRIMA FACIE CASE ESTABLISHED.";
+        renderHouse();
+      }));
+    }
+
+    document.getElementById("burden").addEventListener("input", updateHand);
+    document.getElementById("probability").addEventListener("input", updateHand);
+    document.getElementById("loss").addEventListener("input", updateHand);
+    document.getElementById("restartProducts").addEventListener("click", () => { productPath = [{ id: productFlow.start, answer: null }]; renderProducts(); });
+    document.getElementById("totalDamages").addEventListener("input", updateFault);
+    document.getElementById("plaintiffFault").addEventListener("input", updateFault);
+    document.querySelectorAll("[data-rule]").forEach(btn => btn.addEventListener("click", () => { faultRule = btn.dataset.rule; updateFault(); }));
+    document.getElementById("tortSelect").addEventListener("change", e => {
+      house = { tort: e.target.value, step: "foundation", foundation: false, walls: [], roof: false, cracked: false, message: "" };
+      renderHouse();
+    });
+    render();
+  </script>
+</body>
+</html>
