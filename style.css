@@ -43,13 +43,46 @@ h2 { color: var(--body-charcoal); font-weight: 400; margin-bottom: 30px; }
     text-decoration: none;
     font-weight: bold;
     border-radius: 4px;
+    display: inline-block;
+    margin: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--deep-text-green);
 }
 
 .headshot {
     width: 250px;
     height: auto;
-    margin-top: 30px;
+    margin: 30px auto;
     border-radius: 8px;
+    display: block;
+}
+
+/* Resources Section */
+.resources-section {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 60px 20px;
+    flex-wrap: wrap;
+}
+
+.resource-card {
+    background: white;
+    padding: 40px;
+    border: 1px solid #e1e4e8;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    border-radius: 8px;
+    min-width: 250px;
+}
+
+.resource-card h3 {
+    color: var(--deep-text-green);
+    font-size: 1.3em;
+    margin-bottom: 20px;
 }
 
 /* Grid Cards */
